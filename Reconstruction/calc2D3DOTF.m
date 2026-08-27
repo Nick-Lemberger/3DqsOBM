@@ -36,8 +36,7 @@ for i = 1:pxN/2
             S_minus = -rot90(S_plus,2); % rotate 180° and negate due to symmetry
             SP = (S_plus-S_minus).*P_plus.*P_minus; % Integrand without delta function (T2D)
             T2D(i,j) = sum(SP,'all'); % Integrate SP to calculate T2D at (qx,qz)
-            % Calculate the surface defined by the delta function of the T3D
-            % for a point in the frequency space (qx,qy).
+            % Calculate surface defined by the delta function of the T3D
             % Returned is a list with x,y,z indecies of the points on the surface.
             ew = EwSphereDiff([qx,qy],r0,phiN,thetaN,dkx,dkz,pxN,pzN);
             % Only a quarter of the T3D is calculated directly in the x,y
@@ -59,7 +58,7 @@ end
 % Calculate the rest of T2D via mirroring according to its symmetry
 T2D = T2D + fliplr(T2D);
 T2D = T2D - flipud(T2D);
-% Finally, apply the differential.
+% Finally, multiply by integration step size.
 OTF.T2D = T2D * dkx^2; 
 OTF.T3D = T3D * dkx^2;
 end

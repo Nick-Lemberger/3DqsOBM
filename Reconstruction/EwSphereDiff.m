@@ -6,7 +6,6 @@ function p = EwSphereDiff(q,r0,phiN,thetaN,dkx,dkz,pxN,pzN)
 % intersecting part. 
 % A list of points is returned in positive pixel corrdinates that can be
 % used as index to directly access all allowed u for integration. 
-% Define surface in sperical coordinates
 phiBins = linspace(0,2*pi,phiN);
 thetaBins = linspace(0,pi/2,thetaN);
 [phi, theta] = meshgrid(phiBins,thetaBins); % phi and theta meshgrid
@@ -23,11 +22,10 @@ Zplus =  sqrt(r0^2 - (xSphere+q(1)/2).^2 - (ySphere+q(2)/2).^2);
 Zminus = sqrt(r0^2 - (xSphere-q(1)/2).^2 - (ySphere-q(2)/2).^2);
 
 % Calculate the difference, find imaginary contributions
-% Zplus./abs(Zplus)+Zminus./abs(Zminus)-2 makes sure that 'real' 
-% contributions in the form of ia * ib are also removed by marking them 
-% as imaginary
+% Zplus./abs(Zplus)+Zminus./abs(Zminus)-2 makes sure that contributions in
+% the form of ia * ib are also removed by marking them as imaginary
 Zdiffplane = (Zplus-Zminus) + Zplus./abs(Zplus) + Zminus./abs(Zminus) - 2;
-Zdiffplane = Zdiffplane(:); % Linear indexing
+Zdiffplane = Zdiffplane(:);
 ind_realz = imag(Zdiffplane)==0; % Select only values that are truly real
 
 % Select the corrosponding coordinates, convert to pixel coordinates 
@@ -91,3 +89,37 @@ z = round(linCoords);
 
 p = [x,y,z];
 end
+
+
+
+% % New arrays to save the unique coordinates. Prefill with NaN for
+% % simple removal of unsused space later with  rmmissing(). 
+% x_uniqZ = zeros(length(linCoords),1) + NaN;
+% y_uniqZ = zeros(length(linCoords),1) + NaN;
+% z_uniqZ = zeros(length(linCoords),1) + NaN;
+% % Slower-than-i moving index for following for-loop
+% idc_uniqZ = 1;
+% % Used to mark and skip duplicates already taken care of
+% remainingDupes = ones(length(linCoords),1);
+% 
+% for i = 1:length(linCoords_zFlat)
+%     if(remainingDupes(i))
+%         k = linCoords_zFlat(i); % Look at a coordinate with removed Z
+%         indc_mask = linCoords_zFlat == k; % And get index mask of all duplicates
+%         remainingDupes(indc_mask) = 0; % Mark all duplicates of k as found
+%         % Get the full XYZ linear coordinate of the identified XY duplicates
+%         sel_linCoords = linCoords(indc_mask); 
+%         
+%         % Calculate the 3D components. Calculate the mean value for Z and
+%         % round to nearest grid point.
+%         x_uniqZ(idc_uniqZ) = round(mod(sel_linCoords(1), pxN+1));
+%         
+%         sel_linCoords = floor(sel_linCoords / (pxN+1));
+%         y_uniqZ(idc_uniqZ) = round(mod(sel_linCoords(1), pxN+1));
+%         
+%         sel_linCoords = floor(sel_linCoords / (pxN+1));
+%         z_uniqZ(idc_uniqZ) = round(sum(sel_linCoords)/length(sel_linCoords));
+%         
+%         idc_uniqZ = idc_uniqZ+1;
+%     end
+% end

@@ -1,10 +1,10 @@
-function P = calcPupil(lambda,NA,FOVx,pxN,alpha)
+function P = calcPupil(lambda,NA,FOVx,pxN,beta)
 % Calculate the pupil function for a gaussian beam arriving at the back
 % focal apparture of an microscope objective.
-% alpha defines the ratio between the 1/e^2 beam size w and the back focal
+% beta defines the ratio between the 1/e^2 beam size w and the back focal
 % apparture diameter BFA of the microscope objective. 
-% alpha =  BFA / w
-% alpha = 0 defines a gaussian light source with infinite size,
+% beta =  BFA / w
+% beta = 0 defines a gaussian light source with infinite size,
 % essentially plane waves at the back focal aparture. 
 
 % Calculate lateral frequency grids
@@ -12,8 +12,10 @@ dx = FOVx/pxN; % Image pixel size in µm
 kx_max = 0.5/dx; % Max spatial frequency in lines/µm after fft of image
 dkx = 2*kx_max/pxN; % Frequency step per pixel in lines/µm of image fft
 
-fc_NA = 2*NA/lambda; % Cut-off frequency from MO in lines/µm
+% CORRECTION: removed factor 2 
+fc_NA = NA/lambda; % Cut-off frequency from MO in lines/µm 
 mask_fc = fc_NA/dkx;
+
 
 % Calculate pupil function
 P = fspecial('disk', mask_fc) == 0;
@@ -30,8 +32,8 @@ else  % If not, padd array to match the mask to the grid size
 end
 P = ~P; % invert
 
-if(alpha > 0)
-    sigma = 0.5 * fc_NA / alpha; % Size of gaussian distribution
+if(beta > 0)
+    sigma = 0.5 * fc_NA / beta; % Size of gaussian distribution
     kxBins = linspace(-kx_max,kx_max-dkx,pxN);
     [kx,ky] = meshgrid(kxBins,kxBins);
     beam_pupil = exp( (-(kx.^2)-(ky.^2)) ./ (2.*sigma.^2));
